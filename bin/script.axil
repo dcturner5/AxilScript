@@ -1,0 +1,145 @@
+int a = 1 + 32;
+
+int: 1
+add: 2
+
+1, 65, 2, 1, 32, 0, 0
+
+2, 1, 32, 0, 1, 0, 65
+
+
+
+int a = 5 + 2;
+
+methods:
+assign: 0 [value, address]
+add: 1 [value1, value2, address]
+sub: 2 [value1, value2, address]
+mult: 3 [value1, value2, address]
+div: 4 [value1, value2, address]
+equal: 5 [value1, value2, address]
+lessthan: 6 [value1, value2, address]
+greaterthan: 7 [value1, value2, address]
+if: 8 [condition, goto[then], goto[else]]
+goto: 9 [index]
+print: 10 [address]
+return: 11 [value]
+run: 12 [address, parameter1, parameter2...]
+build_array: 13 [value1, value2..., address]
+get_from_array: 14 [array_address, index, address]
+
+compiler:
+assign 5 to address 0
+assign 2 to address 1
+assign 0 to address 2
+assign 1 to address 3
+
+runtime instructions:
+1 0 1 2 0 2 65
+
+
+
+int a = 5 + 2;
+
+int i = 0;
+while(i < a) {
+	i += 1;
+}
+
+compiler:
+assign 5 to address 0
+assign 2 to address 1
+assign 0 to address 2
+
+runtime instructions:
+1 0 1 4 [add 5 and 2]
+0 4 65 [set a to (5+2)]
+0 2 73 [set i to 0]
+[10->]6 73 65 4 [condition i < a]
+8 4 17 20 [if i < a: goto 18, else goto 24]
+[18->]1 73 3 73 [add 1 to i]
+9 10 [goto 10]
+[24->]end of program
+
+
+int a = 5 + 2;
+if(a < 8) {
+	a = 100;
+}
+else {
+	a = -100;
+}
+
+compiler:
+assign 5 to address 0
+assign 2 to address 1
+assign 8 to address 2
+assign 100 to address 3
+assign -100 to address 4
+
+runtime instructions:
+[0] 1 0 1 5 [add 5 and 2]
+[4] 0 5 65 [set a to (5+2)]
+[7] 6 65 2 5 [condition a < 8]
+[11]8 5 15 20 [if a < 8: goto 15, else goto 20]
+[15]0 3 65 [set a to 100]
+[18]9 25 [goto 25]
+[20]0 4 65 [set a to -100]
+[23]9 25 [goto 25]
+[25]10, 65 [print a]
+
+
+
+function double(x) {
+	x *= 2;
+	return x;
+}
+
+compiler:
+assign x to address 0
+assign 2 to address 1
+
+runtime:
+[0] 3 0 1 0 [mult x and 2]
+[4] 11 0
+
+int a = 2;
+int b = double(a);
+print b;
+
+compiler:
+assign 2 to address 0
+
+runtime:
+[0] 0 0 65 [set a to 2]
+[3] 12 ? 0 1 -1 [run double(x) and set result to address 1]
+[8] 0 1 66 [set b to double(a)]
+[11]10 66 [print b]
+
+
+
+int[] a = [1, 2, 3, 4];
+print a[2];
+
+compiler:
+assign 1 to 0
+assign 2 to 1
+assign 3 to 2
+assign 4 to 3
+assign 2 to 4
+
+runtime:
+[0] 13 0 1 2 3 5 -1 [build [1, 2, 3, 4]]
+[7] 0 5 65 [set a to [1, 2, 3, 4]]
+[10]14 65 4 6 [get a[2]]
+[14]10 6 [print a[2]]
+
+
+
+
+
+
+
+
+
+
