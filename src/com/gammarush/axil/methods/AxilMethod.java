@@ -1,5 +1,7 @@
 package com.gammarush.axil.methods;
 
+import com.gammarush.axil.memory.AxilMemory;
+
 public class AxilMethod {
 	
 	private int id;
@@ -14,8 +16,8 @@ public class AxilMethod {
 		this.method = method;
 	}
 	
-	public int execute(int[] args, Object[] storage) {
-		return method.execute(args, storage);
+	public int execute(int[] args, AxilMemory memory) {
+		return method.execute(args, memory);
 	}
 
 	public int getId() {
