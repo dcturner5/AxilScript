@@ -43,22 +43,15 @@ public class AxilCompiler {
 	}
 	
 	public int[] compile(String string, int index, AxilCompilerMemory memory) {
-		//System.out.println("Index " + index);
-		//have a map when compiling that just places these variables in next avail slot (0, 1, 2...)
 		string = sanitize(string);
 		
 		int[] result = new int[] {};
 		ArrayList<String> lines = getLines(string);
 		for(String line : lines) {
 			int[] instructions = compileLine(line, index + result.length, memory);
-			for(int i : instructions) {
-				//System.out.print(i + ", ");
-			}
 			result = combine(result, instructions);
 		}
-		//System.out.println();
 		
-		memory.print();
 		return result;
 	}
 	
@@ -262,7 +255,6 @@ public class AxilCompiler {
 				int[] instruction = compileExpression(string.substring(startIndex, i), memory);
 				if(instruction.length == 0) {
 					args.add(new int[] {});
-					System.out.println("ARG: " + string.substring(startIndex, i));
 					argResults.add(memory.get(string.substring(startIndex, i)));
 					startIndex = i + 1;
 				}
@@ -274,27 +266,25 @@ public class AxilCompiler {
 			}
 		}
 		
-		//fix later for methods that dont have args
-		int[] instruction = compileExpression(string.substring(startIndex), memory);
-		if(instruction.length == 0) {
-			args.add(new int[] {});
-			System.out.println("ARG: " + string.substring(startIndex));
-			argResults.add(memory.get(string.substring(startIndex)));
-		}
-		else {
-			args.add(instruction);
-			argResults.add(instruction[instruction.length - 1]);
-		}
-		
-		
-		
-		
 		AxilMethod method = methods.get(name);
-		
 		if(method == null) {
 			System.err.println("METHOD " + name + " DOES NOT EXIST");
 			return new int[] {};
 		}
+		
+		if(method.getArgsLength() > 1) {
+			int[] instruction = compileExpression(string.substring(startIndex), memory);
+			if(instruction.length == 0) {
+				args.add(new int[] {});
+				argResults.add(memory.get(string.substring(startIndex)));
+			}
+			else {
+				args.add(instruction);
+				argResults.add(instruction[instruction.length - 1]);
+			}
+		}
+		
+		
 		
 		if(method.getArgsLength() - 1 != args.size()) {
 			//throw error

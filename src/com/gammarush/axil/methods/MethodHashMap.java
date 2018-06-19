@@ -90,7 +90,7 @@ public class MethodHashMap {
 		});
 		put("divide", 3, (int[] args, AxilMemory memory) -> {
 			//check for divide by zero
-			int address = (int) args[2];
+			int address = args[2];
 			Type type0 = memory.getType(args[0]);
 			Type type1 = memory.getType(args[1]);
 			if(type0 == Type.STRING || type1 == Type.STRING) {
@@ -126,7 +126,7 @@ public class MethodHashMap {
 			return -1;
 		});
 		put("equals", 3, (int[] args, AxilMemory memory) -> {
-			int address = (int) args[2];
+			int address = args[2];
 			Type type0 = memory.getType(args[0]);
 			Type type1 = memory.getType(args[1]);
 			if(type0 == Type.STRING || type1 == Type.STRING) {
@@ -148,7 +148,7 @@ public class MethodHashMap {
 			return -1;
 		});
 		put("not_equals", 3, (int[] args, AxilMemory memory) -> {
-			int address = (int) args[2];
+			int address = args[2];
 			Type type0 = memory.getType(args[0]);
 			Type type1 = memory.getType(args[1]);
 			if(type0 == Type.STRING || type1 == Type.STRING) {
@@ -170,7 +170,7 @@ public class MethodHashMap {
 			return -1;
 		});
 		put("less_than", 3, (int[] args, AxilMemory memory) -> {
-			int address = (int) args[2];
+			int address = args[2];
 			Type type0 = memory.getType(args[0]);
 			Type type1 = memory.getType(args[1]);
 			if(type0 == Type.STRING || type1 == Type.STRING) {
@@ -188,7 +188,7 @@ public class MethodHashMap {
 			return -1;
 		});
 		put("greater_than", 3, (int[] args, AxilMemory memory) -> {
-			int address = (int) args[2];
+			int address = args[2];
 			Type type0 = memory.getType(args[0]);
 			Type type1 = memory.getType(args[1]);
 			if(type0 == Type.STRING || type1 == Type.STRING) {
@@ -206,7 +206,7 @@ public class MethodHashMap {
 			return -1;
 		});
 		put("square_root", 2, (int[] args, AxilMemory memory) -> {
-			int address = (int) args[1];
+			int address = args[1];
 			Type type0 = memory.getType(args[0]);
 			Type type1 = memory.getType(args[1]);
 			if(type0 == Type.STRING || type1 == Type.STRING) {
@@ -236,9 +236,34 @@ public class MethodHashMap {
 			return -1;
 		});
 		put("negate", 2, (int[] args, AxilMemory memory) -> {
-			int address = (int) args[1];
+			int address = args[1];
 			boolean value = !memory.getBoolean(args[0]);
 			memory.setBoolean(address, value);
+			return -1;
+		});
+		put("random", 1, (int[] args, AxilMemory memory) -> {
+			int address = args[0];
+			memory.setFloat(address, (float) Math.random());
+			return -1;
+		});
+		put("boolean", 2, (int[] args, AxilMemory memory) -> {
+			int address = args[1];
+			memory.setBoolean(address, memory.getBoolean(args[0]));
+			return -1;
+		});
+		put("float", 2, (int[] args, AxilMemory memory) -> {
+			int address = args[1];
+			memory.setFloat(address, memory.getFloat(args[0]));
+			return -1;
+		});
+		put("int", 2, (int[] args, AxilMemory memory) -> {
+			int address = args[1];
+			memory.setInt(address, memory.getInt(args[0]));
+			return -1;
+		});
+		put("string", 2, (int[] args, AxilMemory memory) -> {
+			int address = args[1];
+			memory.setString(address, memory.getString(args[0]));
 			return -1;
 		});
 		/*put("assign_array", -1, (int[] args, AxilMemory memory) -> {

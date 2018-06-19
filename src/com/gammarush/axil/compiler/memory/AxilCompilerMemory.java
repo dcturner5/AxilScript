@@ -151,9 +151,9 @@ public class AxilCompilerMemory {
 		String string = "";
 		for(Constant c : constants) {
 			if(c.type == Type.BOOLEAN) string += "memory.setBoolean(" + c.address + ", " + c.value + ");\n";
-			if(c.type == Type.FLOAT) string += "memory.setFloat(" + c.address + ", " + c.value + ");\n";
+			if(c.type == Type.FLOAT) string += "memory.setFloat(" + c.address + ", " + c.value + "f);\n";
 			if(c.type == Type.INT) string += "memory.setInt(" + c.address + ", " + c.value + ");\n";
-			if(c.type == Type.STRING) string += "memory.setString(" + c.address + ", " + c.value + ");\n";
+			if(c.type == Type.STRING) string += "memory.setString(\"" + c.address + ", " + c.value + "\");\n";
 		}
 		System.out.println(string);
 	}

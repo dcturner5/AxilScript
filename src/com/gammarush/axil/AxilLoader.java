@@ -17,14 +17,6 @@ public class AxilLoader {
 				string += line;
 			}
 			in.close();
-			
-			if(string.length() > 0) {
-				char first = string.charAt(0);
-				if(first == '{') {
-					string = string.substring(1, string.length() - 1);
-				}
-				//result = parseObject(string);
-			}
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("Unable to open file '" + path + "'");
