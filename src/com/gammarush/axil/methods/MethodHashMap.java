@@ -205,6 +205,42 @@ public class MethodHashMap {
 			}
 			return -1;
 		});
+		put("less_than_or_equals", 3, (int[] args, AxilMemory memory) -> {
+			int address = args[2];
+			Type type0 = memory.getType(args[0]);
+			Type type1 = memory.getType(args[1]);
+			if(type0 == Type.STRING || type1 == Type.STRING) {
+				//throw error
+				memory.setBoolean(address, false);
+			}
+			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+				boolean value = memory.getFloat(args[0]) <= memory.getFloat(args[1]);
+				memory.setBoolean(address, value);
+			}
+			else {
+				boolean value = memory.getInt(args[0]) <= memory.getInt(args[1]);
+				memory.setBoolean(address, value);
+			}
+			return -1;
+		});
+		put("greater_than_or_equals", 3, (int[] args, AxilMemory memory) -> {
+			int address = args[2];
+			Type type0 = memory.getType(args[0]);
+			Type type1 = memory.getType(args[1]);
+			if(type0 == Type.STRING || type1 == Type.STRING) {
+				//throw error
+				memory.setBoolean(address, false);
+			}
+			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+				boolean value = memory.getFloat(args[0]) >= memory.getFloat(args[1]);
+				memory.setBoolean(address, value);
+			}
+			else {
+				boolean value = memory.getInt(args[0]) >= memory.getInt(args[1]);
+				memory.setBoolean(address, value);
+			}
+			return -1;
+		});
 		put("square_root", 2, (int[] args, AxilMemory memory) -> {
 			int address = args[1];
 			Type type0 = memory.getType(args[0]);
@@ -230,6 +266,9 @@ public class MethodHashMap {
 		});
 		put("goto", 1, (int[] args, AxilMemory memory) -> {
 			return args[0];
+		});
+		put("goto_from_memory", 1, (int[] args, AxilMemory memory) -> {
+			return memory.getInt(args[0]);
 		});
 		put("print", 2, (int[] args, AxilMemory memory) -> {
 			System.out.println(memory.get(args[0]));

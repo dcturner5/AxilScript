@@ -15,7 +15,7 @@ public class AxilCompiler {
 	private static final String[] DATA_TYPES = new String[] {"boolean", "boolean[]", "float", "float[]", "int", "int[]", "string", "string[]"};
 	//private static final String[] OPERATORS = new String[] {"+", "-", "*", "/", "<", ">", "!=", "==", "&&", "||"};
 	private static final String[] ONE_SPACE_SYMBOLS = new String[] {"boolean", "double", "float", "int", "print", "return", "string"};
-	private static final String[] NO_SPACE_SYMBOLS = new String[] {"**", "==", "!=", "!", "*", "/", "+", "-", "<", ">", "=", "(", ")", "[", "]", "{", "}", ",", "for", "if", "else", "while"};
+	private static final String[] NO_SPACE_SYMBOLS = new String[] {"**", "==", "!=", "<=", ">=", "!", "*", "/", "+", "-", "<", ">", "=", "(", ")", "[", "]", "{", "}", ",", "for", "function", "if", "else", "while"};
 	
 	private static OperatorHashMap OPERATORS = new OperatorHashMap();
 	
@@ -23,6 +23,8 @@ public class AxilCompiler {
 	
 	public AxilCompiler(MethodHashMap methods) {
 		OPERATORS.put(new AxilOperator("**", "power", 15));
+		OPERATORS.put(new AxilOperator("<=", "less_than_or_equals", 11));
+		OPERATORS.put(new AxilOperator(">=", "greater_than_or_equals", 11));
 		OPERATORS.put(new AxilOperator("==", "equals", 10));
 		OPERATORS.put(new AxilOperator("!=", "not_equals", 10));
 		
@@ -47,7 +49,23 @@ public class AxilCompiler {
 		
 		int[] result = new int[] {};
 		ArrayList<String> lines = getLines(string);
+		
+		//TODO Fix if, elseif, and else linking
+		/*boolean ifStatement = false;
+		for(int i = 0; i < lines.size(); i++) {
+			String line = lines.get(i);
+			if(ifStatement && (isElseIfStatement(line) || isElseStatement(line))) {
+				lines.set(i - 1, lines.get(i - 1) + line);
+				ifStatement = isIfStatement(line) || isElseIfStatement(line);
+				lines.remove(i);
+			}
+			else {
+				ifStatement = isIfStatement(line) || isElseIfStatement(line);
+			}
+		}*/
+		
 		for(String line : lines) {
+			System.out.println("LINE: " + line);
 			int[] instructions = compileLine(line, index + result.length, memory);
 			result = combine(result, instructions);
 		}
@@ -56,8 +74,6 @@ public class AxilCompiler {
 	}
 	
 	private int[] compileExpression(String string, AxilCompilerMemory memory) {
-		//System.out.println("%%% " + string + " %%%");
-		
 		ArrayList<int[]> preInstructions = new ArrayList<int[]>();
 		int preSize = 0;
 		int startIndex = 0;
@@ -169,6 +185,50 @@ public class AxilCompiler {
 		return result;
 	}
 	
+	private int[] compileFunctionDeclaration(String string, int index, AxilCompilerMemory memory) {
+		int pIndex = string.indexOf('(');
+		String name = string.substring("function".length(), pIndex);
+		string = string.substring(pIndex + 1);
+		
+		ArrayList<Integer> args = new ArrayList<Integer>();
+		int startIndex = 0;
+		int bracketLayer = 0, stringLayer = 0;
+		for(int i = 0; i < string.length(); i++) {
+			char c = string.charAt(i);
+			if(c == '(' && stringLayer == 0) {
+				bracketLayer++;
+			}
+			else if(c == ')' && stringLayer == 0) {
+				bracketLayer--;
+				//TODO put this in method call
+				if(bracketLayer == -1) {
+					args.add(memory.get(string.substring(startIndex, i)));
+					startIndex = i + 1;
+					break;
+				}
+			}
+			else if(c == '\"') {
+				if(stringLayer == 0) stringLayer = 1;
+				else stringLayer = 0;
+			}
+			else if(c == ',' && bracketLayer == 0 && stringLayer == 0) {
+				args.add(memory.get(string.substring(startIndex, i)));
+				startIndex = i + 1;
+			}
+		}
+		
+		//this address is where to post goto goes after function is finished, allows for returns?
+		int address = memory.reserve();
+		int[] postInstruction = new int[] {methods.getId("goto_from_memory"), address};
+		
+		String body = string.substring(startIndex + 1, string.length() - 1);
+		int[] bodyInstruction = combine(compile(body, index + 2, memory), postInstruction);
+		
+		int[] preInstruction = new int[] {methods.getId("goto"), index + bodyInstruction.length + 2};
+		
+		return combine(preInstruction, bodyInstruction);
+	}
+	
 	private int[] compileIfStatement(String string, int index, AxilCompilerMemory memory) {
 		String condition = "";
 		int startIndex = 0, endIndex = 0;
@@ -208,21 +268,20 @@ public class AxilCompiler {
 	}
 	
 	private int[] compileLine(String string, int index, AxilCompilerMemory memory) {
-		if(isIfStatement(string)) {
+		if(isFunctionDeclaration(string)) {
+			return compileFunctionDeclaration(string, index, memory);
+		}
+		else if(isIfStatement(string)) {
 			//System.out.println("IF STATEMENT: " + string);
 			return compileIfStatement(string, index, memory);
 		}
-		else if(isElseStatement(string)) {
-			System.out.println("ELSE STATEMENT: " + string);
+		else if(isReturnStatement(string)) {
+			System.out.println("RETURN STATEMENT: " + string);
 			return new int[] {};
 		}
 		else if(isWhileLoop(string)) {
 			//System.out.println("WHILE LOOP: " + string);
 			return compileWhileLoop(string, index, memory);
-		}
-		else if(isReturnStatement(string)) {
-			System.out.println("RETURN STATEMENT: " + string);
-			return new int[] {};
 		}
 		else {
 			//System.out.println("EXPRESSION: " + string);
@@ -383,7 +442,15 @@ public class AxilCompiler {
 	}
 	
 	private boolean isElseStatement(String string) {
-		return string.indexOf("else") == 0;
+		return string.indexOf("else") == 0 && string.indexOf("elseif") != 0;
+	}
+	
+	private boolean isElseIfStatement(String string) {
+		return string.indexOf("elseif") == 0;
+	}
+	
+	private boolean isFunctionDeclaration(String string) {
+		return string.indexOf("function") == 0;
 	}
 	
 	private boolean isIfStatement(String string) {

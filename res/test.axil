@@ -1,5 +1,3 @@
-i = 0;
-while(i < 10) {
-	print(float(int(random() * 2)));
-	i = i + 1;
+function name(x) {
+	print(x);
 }
