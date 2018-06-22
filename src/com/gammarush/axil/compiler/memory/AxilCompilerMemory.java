@@ -3,53 +3,17 @@ package com.gammarush.axil.compiler.memory;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.gammarush.axil.memory.AxilFunction;
 import com.gammarush.axil.memory.AxilMemory;
+import com.gammarush.axil.memory.AxilType;
 
 public class AxilCompilerMemory {
 	
-	public class Constant {
-		private int address;
-		private Object value;
-		private Type type;
-		
-		public Constant(int address, Object value, Type type) {
-			this.address = address;
-			this.value = value;
-			this.type = type;
-		}
-	}
-	
-	public class Function {
-		private int address;
-		private int returnAddress;
-		private int[] argAddresses;
-		
-		public Function(int address, int returnAddress, int[] argAddresses) {
-			this.address = address;
-			this.returnAddress = returnAddress;
-			this.argAddresses = argAddresses;
-		}
-		
-		public int getAddress() {
-			return address;
-		}
-		
-		public int getReturnAddress() {
-			return returnAddress;
-		}
-		
-		public int[] getArgAddresses() {
-			return argAddresses;
-		}
-	}
-	
-	public enum Type {
-		BOOLEAN, FLOAT, INT, STRING, UNDEFINED
-	}
-	
 	private HashMap<String, Integer> addressMap = new HashMap<String, Integer>();
-	private HashMap<String, Function> functionMap = new HashMap<String, Function>();
-	private ArrayList<Constant> constants = new ArrayList<Constant>();
+	private ArrayList<AxilConstant> constants = new ArrayList<AxilConstant>();
+	
+	private HashMap<String, AxilFunction> functionMap = new HashMap<String, AxilFunction>();
+	private ArrayList<AxilFunction> functions = new ArrayList<AxilFunction>();
 	
 	private int size = 0;
 	
@@ -62,20 +26,20 @@ public class AxilCompilerMemory {
 			return addressMap.get(name);
 		}
 		else {
-			Type type = parseType(name);
-			if(type == Type.BOOLEAN) {
+			AxilType type = parseAxilType(name);
+			if(type == AxilType.BOOLEAN) {
 				int address = set(name, parseBoolean(name));
 				return address;
 			}
-			else if(type == Type.FLOAT) {
+			else if(type == AxilType.FLOAT) {
 				int address = set(name, parseFloat(name));
 				return address;
 			}
-			else if(type == Type.INT) {
+			else if(type == AxilType.INT) {
 				int address = set(name, parseInt(name));
 				return address;
 			}
-			else if(type == Type.STRING) {
+			else if(type == AxilType.STRING) {
 				int address = set(name, parseString(name));
 				return address;
 			}
@@ -86,7 +50,7 @@ public class AxilCompilerMemory {
 		}
 	}
 	
-	public Function getFunction(String name) {
+	public AxilFunction getFunction(String name) {
 		return functionMap.get(name);
 	}
 	
@@ -106,30 +70,31 @@ public class AxilCompilerMemory {
 	
 	public int set(String name, boolean value) {
 		int address = set(name);
-		constants.add(new Constant(address, value, Type.BOOLEAN));
+		constants.add(new AxilConstant(address, value, AxilType.BOOLEAN));
 		return address;
 	}
 	
 	public int set(String name, float value) {
 		int address = set(name);
-		constants.add(new Constant(address, value, Type.FLOAT));
+		constants.add(new AxilConstant(address, value, AxilType.FLOAT));
 		return address;
 	}
 	
 	public int set(String name, int value) {
 		int address = set(name);
-		constants.add(new Constant(address, value, Type.INT));
+		constants.add(new AxilConstant(address, value, AxilType.INT));
 		return address;
 	}
 	
 	public int set(String name, String value) {
 		int address = set(name);
-		constants.add(new Constant(address, value, Type.STRING));
+		constants.add(new AxilConstant(address, value, AxilType.STRING));
 		return address;
 	}
 	
-	public void setFunction(String name, Function function) {
-		functionMap.put(name, function);
+	public void setFunction(AxilFunction function) {
+		functionMap.put(function.getName(), function);
+		functions.add(function);
 	}
 	
 	private boolean parseBoolean(String string) {
@@ -149,32 +114,32 @@ public class AxilCompilerMemory {
 		return string.substring(1, string.length() - 1);
 	}
 	
-	private Type parseType(String string) {
+	private AxilType parseAxilType(String string) {
 		char first = string.charAt(0);
 		char last = string.charAt(string.length() - 1);
 		if(first == '\"' && last == '\"') {
-			return Type.STRING;
+			return AxilType.STRING;
 		}
 		else if(string.equals("true") || string.equals("false")) {
-			return Type.BOOLEAN;
+			return AxilType.BOOLEAN;
 		}
 		else {
 			if(string.indexOf('.') != -1) {
 				try {
 					Float.valueOf(string.trim()).floatValue();
-					return Type.FLOAT;
+					return AxilType.FLOAT;
 				}
 				catch (NumberFormatException e) {
-					return Type.UNDEFINED;
+					return AxilType.UNDEFINED;
 				}
 			}
 			else {
 				try {
 					Integer.valueOf(string.trim()).intValue();
-					return Type.INT;
+					return AxilType.INT;
 				}
 				catch (NumberFormatException e) {
-					return Type.UNDEFINED;
+					return AxilType.UNDEFINED;
 				}
 			}
 		}
@@ -182,21 +147,24 @@ public class AxilCompilerMemory {
 	
 	public void print() {
 		String string = "";
-		for(Constant c : constants) {
-			if(c.type == Type.BOOLEAN) string += "memory.setBoolean(" + c.address + ", " + c.value + ");\n";
-			if(c.type == Type.FLOAT) string += "memory.setFloat(" + c.address + ", " + c.value + "f);\n";
-			if(c.type == Type.INT) string += "memory.setInt(" + c.address + ", " + c.value + ");\n";
-			if(c.type == Type.STRING) string += "memory.setString(" + c.address + ", \"" + c.value + "\");\n";
+		for(AxilConstant c : constants) {
+			if(c.getType() == AxilType.BOOLEAN) string += "memory.setBoolean(" + c.getAddress() + ", " + c.getValue() + ");\n";
+			if(c.getType() == AxilType.FLOAT) string += "memory.setFloat(" + c.getAddress() + ", " + c.getValue() + "f);\n";
+			if(c.getType() == AxilType.INT) string += "memory.setInt(" + c.getAddress() + ", " + c.getValue() + ");\n";
+			if(c.getType() == AxilType.STRING) string += "memory.setString(" + c.getAddress() + ", \"" + c.getValue() + "\");\n";
 		}
 		System.out.println(string);
 	}
 	
 	public void load(AxilMemory memory) {
-		for(Constant c : constants) {
-			if(c.type == Type.BOOLEAN) memory.setBoolean(c.address, (boolean) c.value);
-			if(c.type == Type.FLOAT) memory.setFloat(c.address, (float) c.value);
-			if(c.type == Type.INT) memory.setInt(c.address, (int) c.value);
-			if(c.type == Type.STRING) memory.setString(c.address, (String) c.value);
+		for(AxilConstant c : constants) {
+			if(c.getType() == AxilType.BOOLEAN) memory.setBoolean(c.getAddress(), (boolean) c.getValue());
+			if(c.getType() == AxilType.FLOAT) memory.setFloat(c.getAddress(), (float) c.getValue());
+			if(c.getType() == AxilType.INT) memory.setInt(c.getAddress(), (int) c.getValue());
+			if(c.getType() == AxilType.STRING) memory.setString(c.getAddress(), (String) c.getValue());
+		}
+		for(AxilFunction f : functions) {
+			memory.setFunction(f);
 		}
 	}
 

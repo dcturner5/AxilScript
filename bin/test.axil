@@ -1,5 +1,10 @@
-function print_extended(x) {
-	print(x + " world");
-}
+i = 0;
 
-print_extended("hello");
+function click() {
+	i = i + 1;
+	string = "You've clicked " + i + " time";
+	if(i != 1) {
+		string = string + "s";
+	}
+	print(string);
+}

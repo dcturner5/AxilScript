@@ -1,24 +1,24 @@
 package com.gammarush.axil.memory;
 
+import java.util.HashMap;
+
 public class AxilMemory {
 	
 	private Object[] array;
-	private Type[] typeArray;
+	private AxilType[] typeArray;
 	private int size = 0;
 	
-	public enum Type {
-		BOOLEAN, FLOAT, INT, STRING, UNDEFINED
-	}
+	private HashMap<String, AxilFunction> functionMap = new HashMap<String, AxilFunction>();
 	
 	public AxilMemory(int maxSize) {
 		array = new Object[maxSize];
-		typeArray = new Type[maxSize];
+		typeArray = new AxilType[maxSize];
 	}
 	
 	public int add(boolean value) {
 		int address = size;
 		array[address] = value;
-		typeArray[address] = Type.BOOLEAN;
+		typeArray[address] = AxilType.BOOLEAN;
 		size++;
 		return address;
 	}
@@ -26,7 +26,7 @@ public class AxilMemory {
 	public int add(float value) {
 		int address = size;
 		array[address] = value;
-		typeArray[address] = Type.FLOAT;
+		typeArray[address] = AxilType.FLOAT;
 		size++;
 		return address;
 	}
@@ -34,7 +34,7 @@ public class AxilMemory {
 	public int add(int value) {
 		int address = size;
 		array[address] = value;
-		typeArray[address] = Type.INT;
+		typeArray[address] = AxilType.INT;
 		size++;
 		return address;
 	}
@@ -42,7 +42,7 @@ public class AxilMemory {
 	public int add(String value) {
 		int address = size;
 		array[address] = value;
-		typeArray[address] = Type.STRING;
+		typeArray[address] = AxilType.STRING;
 		size++;
 		return address;
 	}
@@ -51,87 +51,67 @@ public class AxilMemory {
 		return array[address];
 	}
 	
-	public Type getType(int address) {
+	public AxilType getType(int address) {
 		return typeArray[address];
 	}
 	
-	/*public boolean getBoolean(int address) {
-		if(typeArray[address] == Type.BOOLEAN) {
-			return (boolean) array[address];
-		}
-		return false;
-	}*/
-	
 	public boolean getBoolean(int address) {
-		if(typeArray[address] == Type.BOOLEAN) {
+		if(typeArray[address] == AxilType.BOOLEAN) {
 			return (boolean) array[address];
 		}
 		return toBoolean(get(address), getType(address));
 	}
 	
-	/*public float getFloat(int address) {
-		if(typeArray[address] == Type.FLOAT) {
-			return (float) array[address];
-		}
-		return 0;
-	}*/
-	
 	public float getFloat(int address) {
-		if(typeArray[address] == Type.FLOAT) {
+		if(typeArray[address] == AxilType.FLOAT) {
 			return (float) array[address];
 		}
 		return toFloat(get(address), getType(address));
 	}
 	
-	/*public int getInt(int address) {
-		if(typeArray[address] == Type.INT) {
-			return (int) array[address];
-		}
-		return 0;
-	}*/
-	
 	public int getInt(int address) {
-		if(typeArray[address] == Type.INT) {
+		if(typeArray[address] == AxilType.INT) {
 			return (int) array[address];
 		}
 		return toInt(get(address), getType(address));
 	}
 	
-	/*public String getString(int address) {
-		if(typeArray[address] == Type.STRING) {
-			return (String) array[address];
-		}
-		return "";
-	}*/
-	
 	public String getString(int address) {
-		if(typeArray[address] == Type.STRING) {
+		if(typeArray[address] == AxilType.STRING) {
 			return (String) array[address];
 		}
 		return toString(get(address), getType(address));
 	}
 	
+	public AxilFunction getFunction(String name) {
+		return functionMap.get(name);
+	}
+	
 	public void setBoolean(int address, boolean value) {
 		array[address] = value;
-		typeArray[address] = Type.BOOLEAN;
+		typeArray[address] = AxilType.BOOLEAN;
 	}
 	
 	public void setFloat(int address, float value) {
 		array[address] = value;
-		typeArray[address] = Type.FLOAT;
+		typeArray[address] = AxilType.FLOAT;
 	}
 	
 	public void setInt(int address, int value) {
 		array[address] = value;
-		typeArray[address] = Type.INT;
+		typeArray[address] = AxilType.INT;
 	}
 	
 	public void setString(int address, String value) {
 		array[address] = value;
-		typeArray[address] = Type.STRING;
+		typeArray[address] = AxilType.STRING;
 	}
 	
-	public boolean toBoolean(Object value, Type type) {
+	public void setFunction(AxilFunction function) {
+		functionMap.put(function.getName(), function);
+	}
+	
+	public boolean toBoolean(Object value, AxilType type) {
 		switch(type) {
 		case BOOLEAN:
 			boolean booleanValue = (boolean) value;
@@ -150,7 +130,7 @@ public class AxilMemory {
 		}
 	}
 	
-	public float toFloat(Object value, Type type) {
+	public float toFloat(Object value, AxilType type) {
 		switch(type) {
 		case BOOLEAN:
 			boolean booleanValue = (boolean) value;
@@ -167,8 +147,7 @@ public class AxilMemory {
 				return Float.valueOf(stringValue.trim()).floatValue();
 			}
 			catch (NumberFormatException e) {
-				log("CANT CONVERT STRING TO FLOAT");
-				e.printStackTrace();
+				log("CANT CONVERT STRING \"" + stringValue + "\" TO FLOAT");
 				return 0.0f;
 			}
 		default:
@@ -176,7 +155,7 @@ public class AxilMemory {
 		}
 	}
 	
-	public int toInt(Object value, Type type) {
+	public int toInt(Object value, AxilType type) {
 		switch(type) {
 		case BOOLEAN:
 			boolean booleanValue = (boolean) value;
@@ -193,8 +172,7 @@ public class AxilMemory {
 				return Integer.valueOf(stringValue.trim()).intValue();
 			}
 			catch (NumberFormatException e) {
-				log("CANT CONVERT STRING TO INT");
-				e.printStackTrace();
+				log("CANT CONVERT STRING \"" + stringValue + "\" TO INT");
 				return 0;
 			}
 		default:
@@ -202,7 +180,7 @@ public class AxilMemory {
 		}
 	}
 	
-	public String toString(Object value, Type type) {
+	public String toString(Object value, AxilType type) {
 		return value.toString();
 	}
 	
@@ -222,7 +200,7 @@ public class AxilMemory {
 	}*/
 	
 	private void log(String string) {
-		String result = "\n\nAXILSCRIPT MEMORY ERROR:\n";
+		String result = "\nAXILSCRIPT MEMORY ERROR: ";
 		result += string;
 		result += "\n";
 		System.err.println(result);

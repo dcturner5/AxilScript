@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.gammarush.axil.memory.AxilMemory;
-import com.gammarush.axil.memory.AxilMemory.Type;
+import com.gammarush.axil.memory.AxilType;
 
 public class MethodHashMap {
 	
@@ -15,20 +15,20 @@ public class MethodHashMap {
 	public MethodHashMap() {
 		put("assign", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[0];
-			Type type = memory.getType(args[1]);
-			if(type == Type.BOOLEAN) {
+			AxilType type = memory.getType(args[1]);
+			if(type == AxilType.BOOLEAN) {
 				boolean value = memory.getBoolean(args[1]);
 				memory.setBoolean(address, value);
 			}
-			if(type == Type.FLOAT) {
+			if(type == AxilType.FLOAT) {
 				float value = memory.getFloat(args[1]);
 				memory.setFloat(address, value);
 			}
-			if(type == Type.INT) {
+			if(type == AxilType.INT) {
 				int value = memory.getInt(args[1]);
 				memory.setInt(address, value);
 			}
-			if(type == Type.STRING) {
+			if(type == AxilType.STRING) {
 				String value = memory.getString(args[1]);
 				memory.setString(address, value);
 			}
@@ -40,13 +40,13 @@ public class MethodHashMap {
 		});
 		put("add", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				String value = memory.getString(args[0]) + memory.getString(args[1]);
 				memory.setString(address, value);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				float value = memory.getFloat(args[0]) + memory.getFloat(args[1]);
 				memory.setFloat(address, value);
 			}
@@ -58,13 +58,13 @@ public class MethodHashMap {
 		});
 		put("subtract", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setInt(address, 0);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				float value = memory.getFloat(args[0]) - memory.getFloat(args[1]);
 				memory.setFloat(address, value);
 			}
@@ -76,13 +76,13 @@ public class MethodHashMap {
 		});
 		put("multiply", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setInt(address, 0);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				float value = memory.getFloat(args[0]) * memory.getFloat(args[1]);
 				memory.setFloat(address, value);
 			}
@@ -95,13 +95,13 @@ public class MethodHashMap {
 		put("divide", 3, (int[] args, AxilMemory memory) -> {
 			//check for divide by zero
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setInt(address, 0);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				float value = memory.getFloat(args[0]) / memory.getFloat(args[1]);
 				memory.setFloat(address, value);
 			}
@@ -113,13 +113,13 @@ public class MethodHashMap {
 		});
 		put("power", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setInt(address, 0);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				float value = (float) Math.pow(memory.getFloat(args[0]), memory.getFloat(args[1]));
 				memory.setFloat(address, value);
 			}
@@ -131,17 +131,17 @@ public class MethodHashMap {
 		});
 		put("equals", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				boolean value = memory.getString(args[0]).equals(memory.getString(args[1]));
 				memory.setBoolean(address, value);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				boolean value = memory.getFloat(args[0]) == memory.getFloat(args[1]);
 				memory.setBoolean(address, value);
 			}
-			else if (type0 == Type.INT || type0 == Type.INT){
+			else if (type0 == AxilType.INT || type0 == AxilType.INT){
 				boolean value = memory.getInt(args[0]) == memory.getInt(args[1]);
 				memory.setBoolean(address, value);
 			}
@@ -153,17 +153,17 @@ public class MethodHashMap {
 		});
 		put("not_equals", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				boolean value = memory.getString(args[0]).equals(memory.getString(args[1]));
 				memory.setBoolean(address, value);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				boolean value = memory.getFloat(args[0]) != memory.getFloat(args[1]);
 				memory.setBoolean(address, value);
 			}
-			else if (type0 == Type.INT || type0 == Type.INT){
+			else if (type0 == AxilType.INT || type0 == AxilType.INT){
 				boolean value = memory.getInt(args[0]) != memory.getInt(args[1]);
 				memory.setBoolean(address, value);
 			}
@@ -175,13 +175,13 @@ public class MethodHashMap {
 		});
 		put("less_than", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setBoolean(address, false);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				boolean value = memory.getFloat(args[0]) < memory.getFloat(args[1]);
 				memory.setBoolean(address, value);
 			}
@@ -193,13 +193,13 @@ public class MethodHashMap {
 		});
 		put("greater_than", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setBoolean(address, false);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				boolean value = memory.getFloat(args[0]) > memory.getFloat(args[1]);
 				memory.setBoolean(address, value);
 			}
@@ -211,13 +211,13 @@ public class MethodHashMap {
 		});
 		put("less_than_or_equals", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setBoolean(address, false);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				boolean value = memory.getFloat(args[0]) <= memory.getFloat(args[1]);
 				memory.setBoolean(address, value);
 			}
@@ -229,13 +229,13 @@ public class MethodHashMap {
 		});
 		put("greater_than_or_equals", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setBoolean(address, false);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				boolean value = memory.getFloat(args[0]) >= memory.getFloat(args[1]);
 				memory.setBoolean(address, value);
 			}
@@ -247,13 +247,13 @@ public class MethodHashMap {
 		});
 		put("square_root", 2, (int[] args, AxilMemory memory) -> {
 			int address = args[1];
-			Type type0 = memory.getType(args[0]);
-			Type type1 = memory.getType(args[1]);
-			if(type0 == Type.STRING || type1 == Type.STRING) {
+			AxilType type0 = memory.getType(args[0]);
+			AxilType type1 = memory.getType(args[1]);
+			if(type0 == AxilType.STRING || type1 == AxilType.STRING) {
 				//throw error
 				memory.setInt(address, 0);
 			}
-			else if(type0 == Type.FLOAT || type1 == Type.FLOAT) {
+			else if(type0 == AxilType.FLOAT || type1 == AxilType.FLOAT) {
 				float value = (float) Math.sqrt(memory.getFloat(args[0]));
 				memory.setFloat(address, value);
 			}

@@ -3,8 +3,7 @@ package com.gammarush.axil.compiler;
 import java.util.ArrayList;
 
 import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
-import com.gammarush.axil.compiler.memory.AxilCompilerMemory.*;
-import com.gammarush.axil.memory.AxilMemory;
+import com.gammarush.axil.memory.AxilFunction;
 import com.gammarush.axil.methods.AxilMethod;
 import com.gammarush.axil.methods.MethodHashMap;
 import com.gammarush.axil.operators.AxilOperator;
@@ -13,9 +12,6 @@ import com.gammarush.axil.operators.OperatorHashMap;
 
 public class AxilCompiler {
 	
-	private static final String[] DATA_TYPES = new String[] {"boolean", "boolean[]", "float", "float[]", "int", "int[]", "string", "string[]"};
-	//private static final String[] OPERATORS = new String[] {"+", "-", "*", "/", "<", ">", "!=", "==", "&&", "||"};
-	private static final String[] ONE_SPACE_SYMBOLS = new String[] {"boolean", "double", "float", "int", "print", "return", "string"};
 	private static final String[] NO_SPACE_SYMBOLS = new String[] {"**", "==", "!=", "<=", ">=", "!", "*", "/", "+", "-", "<", ">", "=", "(", ")", "[", "]", "{", "}", ",", "for", "function", "if", "else", "while"};
 	
 	private static OperatorHashMap OPERATORS = new OperatorHashMap();
@@ -188,7 +184,7 @@ public class AxilCompiler {
 		return result;
 	}
 	
-	private int[] compileFunctionDeclaration(String string, int index, AxilCompilerMemory memory) {
+	private int[] compileMethodDeclaration(String string, int index, AxilCompilerMemory memory) {
 		int pIndex = string.indexOf('(');
 		String name = string.substring("function".length(), pIndex);
 		string = string.substring(pIndex + 1);
@@ -205,9 +201,9 @@ public class AxilCompiler {
 				bracketLayer--;
 				if(bracketLayer == -1) {
 					String arg = string.substring(startIndex, i);
-					if(arg.equals("")) break;
-					
-					args.add(memory.get(arg));
+					if(!arg.equals("")) {
+						args.add(memory.get(arg));
+					}
 					startIndex = i + 1;
 					break;
 				}
@@ -237,7 +233,7 @@ public class AxilCompiler {
 			argAddresses[i] = args.get(i);
 		}
 		
-		memory.setFunction(name, memory.new Function(address, returnAddress, argAddresses));
+		memory.setFunction(new AxilFunction(name, address, returnAddress, argAddresses));
 		
 		return combine(preInstruction, bodyInstruction);
 	}
@@ -282,7 +278,7 @@ public class AxilCompiler {
 	
 	private int[] compileLine(String string, int index, AxilCompilerMemory memory) {
 		if(isFunctionDeclaration(string)) {
-			return compileFunctionDeclaration(string, index, memory);
+			return compileMethodDeclaration(string, index, memory);
 		}
 		else if(isIfStatement(string)) {
 			//System.out.println("IF STATEMENT: " + string);
@@ -353,7 +349,7 @@ public class AxilCompiler {
 			}
 		}
 		
-		Function function = memory.getFunction(name);
+		AxilFunction function = memory.getFunction(name);
 		if(function != null) {
 			int[] result = new int[] {};
 			int[] argAddresses = function.getArgAddresses();
@@ -505,10 +501,10 @@ public class AxilCompiler {
 		
 		string = string.replace("\t", "");
 		
-		for(String s : ONE_SPACE_SYMBOLS) {
+		/*for(String s : ONE_SPACE_SYMBOLS) {
 			string = string.replace(" " + s, s);
 			string = string.replace(s + "  ", s + " ");
-		}
+		}*/
 		
 		for(String s : NO_SPACE_SYMBOLS) {
 			string = string.replace(" " + s, s);
