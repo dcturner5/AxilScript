@@ -34,6 +34,10 @@ public class MethodHashMap {
 			}
 			return -1;
 		});
+		put("assign_runtime", 3, (int[] args, AxilMemory memory) -> {
+			memory.setInt(args[0], args[1]);
+			return -1;
+		});
 		put("add", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[2];
 			Type type0 = memory.getType(args[0]);
@@ -267,7 +271,7 @@ public class MethodHashMap {
 		put("goto", 1, (int[] args, AxilMemory memory) -> {
 			return args[0];
 		});
-		put("goto_from_memory", 1, (int[] args, AxilMemory memory) -> {
+		put("goto_memory", 1, (int[] args, AxilMemory memory) -> {
 			return memory.getInt(args[0]);
 		});
 		put("print", 2, (int[] args, AxilMemory memory) -> {

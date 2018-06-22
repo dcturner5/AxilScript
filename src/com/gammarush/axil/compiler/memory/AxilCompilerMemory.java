@@ -7,8 +7,7 @@ import com.gammarush.axil.memory.AxilMemory;
 
 public class AxilCompilerMemory {
 	
-	private class Constant {
-		
+	public class Constant {
 		private int address;
 		private Object value;
 		private Type type;
@@ -20,12 +19,38 @@ public class AxilCompilerMemory {
 		}
 	}
 	
+	public class Function {
+		private int address;
+		private int returnAddress;
+		private int[] argAddresses;
+		
+		public Function(int address, int returnAddress, int[] argAddresses) {
+			this.address = address;
+			this.returnAddress = returnAddress;
+			this.argAddresses = argAddresses;
+		}
+		
+		public int getAddress() {
+			return address;
+		}
+		
+		public int getReturnAddress() {
+			return returnAddress;
+		}
+		
+		public int[] getArgAddresses() {
+			return argAddresses;
+		}
+	}
+	
 	public enum Type {
 		BOOLEAN, FLOAT, INT, STRING, UNDEFINED
 	}
 	
 	private HashMap<String, Integer> addressMap = new HashMap<String, Integer>();
+	private HashMap<String, Function> functionMap = new HashMap<String, Function>();
 	private ArrayList<Constant> constants = new ArrayList<Constant>();
+	
 	private int size = 0;
 	
 	public int get(String name) {
@@ -59,6 +84,10 @@ public class AxilCompilerMemory {
 				return address;
 			}
 		}
+	}
+	
+	public Function getFunction(String name) {
+		return functionMap.get(name);
 	}
 	
 	//reserves this memory space for a future operation
@@ -97,6 +126,10 @@ public class AxilCompilerMemory {
 		int address = set(name);
 		constants.add(new Constant(address, value, Type.STRING));
 		return address;
+	}
+	
+	public void setFunction(String name, Function function) {
+		functionMap.put(name, function);
 	}
 	
 	private boolean parseBoolean(String string) {
@@ -153,7 +186,7 @@ public class AxilCompilerMemory {
 			if(c.type == Type.BOOLEAN) string += "memory.setBoolean(" + c.address + ", " + c.value + ");\n";
 			if(c.type == Type.FLOAT) string += "memory.setFloat(" + c.address + ", " + c.value + "f);\n";
 			if(c.type == Type.INT) string += "memory.setInt(" + c.address + ", " + c.value + ");\n";
-			if(c.type == Type.STRING) string += "memory.setString(\"" + c.address + ", " + c.value + "\");\n";
+			if(c.type == Type.STRING) string += "memory.setString(" + c.address + ", \"" + c.value + "\");\n";
 		}
 		System.out.println(string);
 	}

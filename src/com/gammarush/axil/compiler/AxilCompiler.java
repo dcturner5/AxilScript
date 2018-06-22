@@ -3,6 +3,7 @@ package com.gammarush.axil.compiler;
 import java.util.ArrayList;
 
 import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
+import com.gammarush.axil.compiler.memory.AxilCompilerMemory.*;
 import com.gammarush.axil.memory.AxilMemory;
 import com.gammarush.axil.methods.AxilMethod;
 import com.gammarush.axil.methods.MethodHashMap;
@@ -65,15 +66,17 @@ public class AxilCompiler {
 		}*/
 		
 		for(String line : lines) {
-			System.out.println("LINE: " + line);
+			//System.out.println("LINE: " + line);
 			int[] instructions = compileLine(line, index + result.length, memory);
 			result = combine(result, instructions);
 		}
 		
+		memory.print();
+		
 		return result;
 	}
 	
-	private int[] compileExpression(String string, AxilCompilerMemory memory) {
+	private int[] compileExpression(String string, int index, AxilCompilerMemory memory) {
 		ArrayList<int[]> preInstructions = new ArrayList<int[]>();
 		int preSize = 0;
 		int startIndex = 0;
@@ -103,7 +106,7 @@ public class AxilCompiler {
 				bracketLayer--;
 				if(bracketLayer == 0) {
 					if(operatorIndex + 1 >= startIndex) {
-						int[] instruction = compileExpression(string.substring(startIndex + 1, i), memory);
+						int[] instruction = compileExpression(string.substring(startIndex + 1, i), index, memory);
 						int address = instruction[instruction.length - 1];
 						string = string.substring(0, startIndex) + ":" + address + string.substring(i + 1);
 						preInstructions.add(instruction);
@@ -115,7 +118,7 @@ public class AxilCompiler {
 							operatorIndex += 1;
 						}
 						
-						int[] instruction = compileMethodCall(string.substring(operatorIndex, i), memory);
+						int[] instruction = compileMethodCall(string.substring(operatorIndex, i + 1), index, memory);
 						int address = instruction[instruction.length - 1];
 						string = string.substring(0, operatorIndex) + ":" + address + string.substring(i + 1);
 						preInstructions.add(instruction);
@@ -172,12 +175,12 @@ public class AxilCompiler {
 		int[] main = componentList.compile(memory);
 		
 		//convert preInstructions (ArrayList<int[]>) to pre (int[])
-		int index = 0;
+		int pIndex = 0;
 		for(int i = 0; i < preInstructions.size(); i++) {
 			int[] instruction = preInstructions.get(i);
 			for(int j = 0; j < instruction.length; j++) {
-				pre[index] = instruction[j];
-				index++;
+				pre[pIndex] = instruction[j];
+				pIndex++;
 			}
 		}
 		
@@ -200,9 +203,11 @@ public class AxilCompiler {
 			}
 			else if(c == ')' && stringLayer == 0) {
 				bracketLayer--;
-				//TODO put this in method call
 				if(bracketLayer == -1) {
-					args.add(memory.get(string.substring(startIndex, i)));
+					String arg = string.substring(startIndex, i);
+					if(arg.equals("")) break;
+					
+					args.add(memory.get(arg));
 					startIndex = i + 1;
 					break;
 				}
@@ -218,13 +223,21 @@ public class AxilCompiler {
 		}
 		
 		//this address is where to post goto goes after function is finished, allows for returns?
-		int address = memory.reserve();
-		int[] postInstruction = new int[] {methods.getId("goto_from_memory"), address};
+		int returnAddress = memory.reserve();
+		int[] postInstruction = new int[] {methods.getId("goto_memory"), returnAddress};
 		
 		String body = string.substring(startIndex + 1, string.length() - 1);
 		int[] bodyInstruction = combine(compile(body, index + 2, memory), postInstruction);
 		
-		int[] preInstruction = new int[] {methods.getId("goto"), index + bodyInstruction.length + 2};
+		int address = index + 2;
+		int[] preInstruction = new int[] {methods.getId("goto"), address + bodyInstruction.length};
+		
+		int[] argAddresses = new int[args.size()];
+		for(int i = 0; i < args.size(); i++) {
+			argAddresses[i] = args.get(i);
+		}
+		
+		memory.setFunction(name, memory.new Function(address, returnAddress, argAddresses));
 		
 		return combine(preInstruction, bodyInstruction);
 	}
@@ -255,7 +268,7 @@ public class AxilCompiler {
 			}
 		}
 		
-		int[] conditionInstruction = compileExpression(condition, memory);
+		int[] conditionInstruction = compileExpression(condition, index, memory);
 		int conditionResult = conditionInstruction.length == 0 ? memory.get(condition) : conditionInstruction[conditionInstruction.length - 1];
 		
 		String body = string.substring(endIndex + 2, string.length() - 1);
@@ -285,11 +298,11 @@ public class AxilCompiler {
 		}
 		else {
 			//System.out.println("EXPRESSION: " + string);
-			return compileExpression(string, memory);
+			return compileExpression(string, index, memory);
 		}
 	}
 	
-	private int[] compileMethodCall(String string, AxilCompilerMemory memory) {
+	private int[] compileMethodCall(String string, int index, AxilCompilerMemory memory) {
 		int pIndex = string.indexOf('(');
 		String name = string.substring(0, pIndex);
 		string = string.substring(pIndex + 1);
@@ -305,13 +318,28 @@ public class AxilCompiler {
 			}
 			else if(c == ')' && stringLayer == 0) {
 				bracketLayer--;
+				if(bracketLayer == -1) {
+					String expression = string.substring(startIndex, i);
+					if(expression.equals("")) break;
+					
+					int[] instruction = compileExpression(expression, index, memory);
+					if(instruction.length == 0) {
+						args.add(new int[] {});
+						argResults.add(memory.get(expression));
+					}
+					else {
+						args.add(instruction);
+						argResults.add(instruction[instruction.length - 1]);
+					}
+					break;
+				}
 			}
 			else if(c == '\"') {
 				if(stringLayer == 0) stringLayer = 1;
 				else stringLayer = 0;
 			}
 			else if(c == ',' && bracketLayer == 0 && stringLayer == 0) {
-				int[] instruction = compileExpression(string.substring(startIndex, i), memory);
+				int[] instruction = compileExpression(string.substring(startIndex, i), index, memory);
 				if(instruction.length == 0) {
 					args.add(new int[] {});
 					argResults.add(memory.get(string.substring(startIndex, i)));
@@ -325,50 +353,57 @@ public class AxilCompiler {
 			}
 		}
 		
-		AxilMethod method = methods.get(name);
-		if(method == null) {
-			System.err.println("METHOD " + name + " DOES NOT EXIST");
-			return new int[] {};
-		}
-		
-		if(method.getArgsLength() > 1) {
-			int[] instruction = compileExpression(string.substring(startIndex), memory);
-			if(instruction.length == 0) {
-				args.add(new int[] {});
-				argResults.add(memory.get(string.substring(startIndex)));
+		Function function = memory.getFunction(name);
+		if(function != null) {
+			int[] result = new int[] {};
+			int[] argAddresses = function.getArgAddresses();
+			for(int i = 0; i < args.size(); i++) {
+				int[] arg = args.get(i);
+				if(arg.length > 0) {
+					arg[arg.length - 1] = argAddresses[i];
+					result = combine(result, arg);
+				}
+				else {
+					arg = new int[] {methods.getId("assign"), argAddresses[i], argResults.get(i), -1};
+					result = combine(result, arg);
+				}
 			}
-			else {
-				args.add(instruction);
-				argResults.add(instruction[instruction.length - 1]);
+			
+			int[] main = new int[] {methods.getId("assign_runtime"), function.getReturnAddress(), index + result.length + 6, -1, methods.getId("goto"), function.getAddress()};
+			return combine(result, main);
+		}
+		else {
+			AxilMethod method = methods.get(name);
+			if(method == null) {
+				System.err.println("METHOD " + name + " DOES NOT EXIST");
+				return new int[] {};
 			}
+			
+			if(method.getArgsLength() - 1 != args.size()) {
+				//throw error
+				System.err.println("INVALID ARGUMENTS FOR METHOD " + name);
+				System.err.println("EXPECTED " + (method.getArgsLength() - 1) + ", GOT " + args.size());
+				return new int[] {};
+			}
+			//System.out.println("\n" + method.getId());
+			
+			int address = memory.reserve();
+			int[] main = new int[method.getArgsLength() + 1];
+			main[0] = method.getId();
+			for(int i = 0; i < args.size(); i++) {
+				int argResult = argResults.get(i);
+				main[i + 1] = argResult;
+			}
+			main[main.length - 1] = address;
+			
+			int[] result = new int[] {};
+			for(int i = 0; i < args.size(); i++) {
+				int[] arg = args.get(i);
+				result = combine(result, arg);
+			}
+			
+			return combine(result, main);
 		}
-		
-		
-		
-		if(method.getArgsLength() - 1 != args.size()) {
-			//throw error
-			System.err.println("INVALID ARGUMENTS FOR METHOD " + name);
-			System.err.println("EXPECTED " + (method.getArgsLength() - 1) + ", GOT " + args.size());
-			return new int[] {};
-		}
-		//System.out.println("\n" + method.getId());
-		
-		int address = memory.reserve();
-		int[] main = new int[method.getArgsLength() + 1];
-		main[0] = method.getId();
-		for(int i = 0; i < args.size(); i++) {
-			int argResult = argResults.get(i);
-			main[i + 1] = argResult;
-		}
-		main[main.length - 1] = address;
-		
-		int[] result = new int[] {};
-		for(int i = 0; i < args.size(); i++) {
-			int[] arg = args.get(i);
-			result = combine(result, arg);
-		}
-		
-		return combine(result, main);
 	}
 	
 	private int[] compileWhileLoop(String string, int index, AxilCompilerMemory memory) {
@@ -397,7 +432,7 @@ public class AxilCompiler {
 			}
 		}
 		
-		int[] conditionInstruction = compileExpression(condition, memory);
+		int[] conditionInstruction = compileExpression(condition, index, memory);
 		int conditionResult = conditionInstruction.length == 0 ? memory.get(condition) : conditionInstruction[conditionInstruction.length - 1];
 		
 		String body = string.substring(endIndex + 2, string.length() - 1);

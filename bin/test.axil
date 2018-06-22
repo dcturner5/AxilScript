@@ -1,3 +1,5 @@
-function name(x) {
-	print(x);
+function print_extended(x) {
+	print(x + " world");
 }
+
+print_extended("hello");
