@@ -1,4 +1,4 @@
-package com.gammarush.axil.operators;
+package com.gammarush.axil.compiler.operators;
 
 public class AxilOperator {
 	

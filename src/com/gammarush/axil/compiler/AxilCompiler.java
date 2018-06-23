@@ -3,22 +3,22 @@ package com.gammarush.axil.compiler;
 import java.util.ArrayList;
 
 import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
+import com.gammarush.axil.compiler.operators.AxilOperator;
+import com.gammarush.axil.compiler.operators.AxilOperatorCompiler;
+import com.gammarush.axil.compiler.operators.AxilOperatorMap;
 import com.gammarush.axil.memory.AxilFunction;
 import com.gammarush.axil.methods.AxilMethod;
-import com.gammarush.axil.methods.MethodHashMap;
-import com.gammarush.axil.operators.AxilOperator;
-import com.gammarush.axil.operators.ExpressionComponentList;
-import com.gammarush.axil.operators.OperatorHashMap;
+import com.gammarush.axil.methods.AxilMethodMap;
 
 public class AxilCompiler {
 	
 	private static final String[] NO_SPACE_SYMBOLS = new String[] {"**", "==", "!=", "<=", ">=", "!", "*", "/", "+", "-", "<", ">", "=", "(", ")", "[", "]", "{", "}", ",", "for", "function", "if", "else", "while"};
 	
-	private static OperatorHashMap OPERATORS = new OperatorHashMap();
+	private static AxilOperatorMap OPERATORS = new AxilOperatorMap();
 	
-	private MethodHashMap methods;
+	private AxilMethodMap methods;
 	
-	public AxilCompiler(MethodHashMap methods) {
+	public AxilCompiler(AxilMethodMap methods) {
 		OPERATORS.put(new AxilOperator("**", "power", 15));
 		OPERATORS.put(new AxilOperator("<=", "less_than_or_equals", 11));
 		OPERATORS.put(new AxilOperator(">=", "greater_than_or_equals", 11));
@@ -128,7 +128,7 @@ public class AxilCompiler {
 			}
 		}
 		
-		ExpressionComponentList componentList = new ExpressionComponentList(methods);
+		AxilOperatorCompiler operatorCompiler = new AxilOperatorCompiler(methods);
 		startIndex = 0;
 		for(int i = 0; i < string.length(); i++) {
 			String c = String.valueOf(string.charAt(i));
@@ -150,11 +150,11 @@ public class AxilCompiler {
 					String operatorSymbol = string.substring(i, i + operatorLength + 1);
 					
 					if(!variable.equals("")) {
-						componentList.add(variable);
+						operatorCompiler.add(variable);
 					}
 					if(!operatorSymbol.equals("")) {
-						componentList.addOperator(OPERATORS.get(operatorSymbol));
-						componentList.add(operatorSymbol);
+						operatorCompiler.addOperator(OPERATORS.get(operatorSymbol));
+						operatorCompiler.add(operatorSymbol);
 					}
 					
 					startIndex = i + operatorLength + 1;
@@ -163,12 +163,10 @@ public class AxilCompiler {
 				}
 			}
 		}
-		componentList.add(string.substring(startIndex));
-		
-		//componentList.print();
+		operatorCompiler.add(string.substring(startIndex));
 		
 		int[] pre = new int[preSize];
-		int[] main = componentList.compile(memory);
+		int[] main = operatorCompiler.compile(memory);
 		
 		//convert preInstructions (ArrayList<int[]>) to pre (int[])
 		int pIndex = 0;
@@ -184,7 +182,7 @@ public class AxilCompiler {
 		return result;
 	}
 	
-	private int[] compileMethodDeclaration(String string, int index, AxilCompilerMemory memory) {
+	private int[] compileFunctionDeclaration(String string, int index, AxilCompilerMemory memory) {
 		int pIndex = string.indexOf('(');
 		String name = string.substring("function".length(), pIndex);
 		string = string.substring(pIndex + 1);
@@ -278,7 +276,7 @@ public class AxilCompiler {
 	
 	private int[] compileLine(String string, int index, AxilCompilerMemory memory) {
 		if(isFunctionDeclaration(string)) {
-			return compileMethodDeclaration(string, index, memory);
+			return compileFunctionDeclaration(string, index, memory);
 		}
 		else if(isIfStatement(string)) {
 			//System.out.println("IF STATEMENT: " + string);
@@ -472,13 +470,13 @@ public class AxilCompiler {
 		return result;
 	}
 	
-	private boolean isElseStatement(String string) {
+	/*private boolean isElseStatement(String string) {
 		return string.indexOf("else") == 0 && string.indexOf("elseif") != 0;
 	}
 	
 	private boolean isElseIfStatement(String string) {
 		return string.indexOf("elseif") == 0;
-	}
+	}*/
 	
 	private boolean isFunctionDeclaration(String string) {
 		return string.indexOf("function") == 0;

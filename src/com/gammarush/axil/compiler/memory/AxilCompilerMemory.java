@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.gammarush.axil.memory.AxilFunction;
-import com.gammarush.axil.memory.AxilMemory;
 import com.gammarush.axil.memory.AxilType;
 
 public class AxilCompilerMemory {

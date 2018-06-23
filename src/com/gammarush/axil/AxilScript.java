@@ -11,7 +11,7 @@ import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
 import com.gammarush.axil.memory.AxilFunction;
 import com.gammarush.axil.memory.AxilMemory;
 import com.gammarush.axil.methods.AxilMethod;
-import com.gammarush.axil.methods.MethodHashMap;
+import com.gammarush.axil.methods.AxilMethodMap;
 
 public class AxilScript {
 	
@@ -20,13 +20,13 @@ public class AxilScript {
 	
 	private AxilCompiler compiler;
 	private AxilMemory memory;
-	private MethodHashMap methods;
+	private AxilMethodMap methods;
 	
 	public AxilScript(String path) {
 		this.path = path;
 		
 		memory = new AxilMemory(1024);
-		methods = new MethodHashMap();
+		methods = new AxilMethodMap();
 		
 		compiler = new AxilCompiler(methods);
 	}

@@ -1,4 +1,4 @@
-package com.gammarush.axil.operators;
+package com.gammarush.axil.compiler.operators;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,12 +6,11 @@ import java.util.Comparator;
 
 import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
 import com.gammarush.axil.methods.AxilMethod;
-import com.gammarush.axil.methods.MethodHashMap;
+import com.gammarush.axil.methods.AxilMethodMap;
 
-public class ExpressionComponentList {
+public class AxilOperatorCompiler {
 	
 	private class OperatorInstance {
-			
 		private AxilOperator axilOperator;
 		private int index;
 			
@@ -31,15 +30,14 @@ public class ExpressionComponentList {
 		public void setIndex(int index) {
 			this.index = index;
 		}
-
 	}
 	
 	private ArrayList<String> components = new ArrayList<String>();
 	private ArrayList<OperatorInstance> operators = new ArrayList<OperatorInstance>();
 	
-	private MethodHashMap methods;
+	private AxilMethodMap methods;
 	
-	public ExpressionComponentList(MethodHashMap methods) {
+	public AxilOperatorCompiler(AxilMethodMap methods) {
 		this.methods = methods;
 	}
 	
@@ -71,7 +69,6 @@ public class ExpressionComponentList {
 		for(int i = 0; i < operators.size(); i++) {
 			instructions[i] = compileOperation(operators.get(i), memory);
 			size += instructions[i].length;
-			//print();
 		}
 		
 		result = new int[size];
@@ -80,10 +77,8 @@ public class ExpressionComponentList {
 		for(int i = 0; i < operators.size(); i++) {
 			for(int j = 0; j < instructions[i].length; j++) {
 				result[index] = instructions[i][j];
-				//System.out.print(result[index] + " ");
 				index++;
 			}
-			//System.out.println();
 		}
 		
 		return result;
@@ -95,7 +90,7 @@ public class ExpressionComponentList {
 		int[] result = new int[method.getArgsLength() + 1];
 		
 		result[0] = method.getId();
-		//reserve memory for later, fix this with a cache memory section
+		
 		int address = memory.reserve();
 		
 		if(operator.getArgsLength() == 1) {

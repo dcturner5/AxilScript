@@ -6,13 +6,13 @@ import java.util.HashMap;
 import com.gammarush.axil.memory.AxilMemory;
 import com.gammarush.axil.memory.AxilType;
 
-public class MethodHashMap {
+public class AxilMethodMap {
 	
 	private HashMap<Integer, AxilMethod> idMap = new HashMap<Integer, AxilMethod>();
 	private HashMap<String, AxilMethod> nameMap = new HashMap<String, AxilMethod>();
 	private ArrayList<AxilMethod> array = new ArrayList<AxilMethod>();
 	
-	public MethodHashMap() {
+	public AxilMethodMap() {
 		put("assign", 3, (int[] args, AxilMemory memory) -> {
 			int address = args[0];
 			AxilType type = memory.getType(args[1]);

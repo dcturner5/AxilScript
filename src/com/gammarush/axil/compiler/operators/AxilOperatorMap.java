@@ -1,9 +1,9 @@
-package com.gammarush.axil.operators;
+package com.gammarush.axil.compiler.operators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class OperatorHashMap {
+public class AxilOperatorMap {
 	
 	private HashMap<String, AxilOperator> nameMap = new HashMap<String, AxilOperator>();
 	private ArrayList<AxilOperator> array = new ArrayList<AxilOperator>();

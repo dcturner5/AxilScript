@@ -2,7 +2,7 @@ i = 0;
 
 function click(name) {
 	i = i + 1;
-	string = name + " you've clicked " + i * random() + " time";
+	string = name + " you've clicked " + i + " time";
 	if(i != 1) {
 		string = string + "s";
 	}
