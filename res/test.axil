@@ -1,8 +1,8 @@
 i = 0;
 
-function click() {
+function click(name) {
 	i = i + 1;
-	string = "You've clicked " + i + " time";
+	string = name + " you've clicked " + i + " time";
 	if(i != 1) {
 		string = string + "s";
 	}

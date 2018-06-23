@@ -67,7 +67,7 @@ public class AxilCompiler {
 			result = combine(result, instructions);
 		}
 		
-		memory.print();
+		//memory.print();
 		
 		return result;
 	}

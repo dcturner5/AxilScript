@@ -26,7 +26,7 @@ public class AxilCompilerMemory {
 			return addressMap.get(name);
 		}
 		else {
-			AxilType type = parseAxilType(name);
+			AxilType type = parseType(name);
 			if(type == AxilType.BOOLEAN) {
 				int address = set(name, parseBoolean(name));
 				return address;
@@ -52,6 +52,14 @@ public class AxilCompilerMemory {
 	
 	public AxilFunction getFunction(String name) {
 		return functionMap.get(name);
+	}
+	
+	public ArrayList<AxilConstant> getConstants() {
+		return constants;
+	}
+	
+	public ArrayList<AxilFunction> getFunctions() {
+		return functions;
 	}
 	
 	//reserves this memory space for a future operation
@@ -114,7 +122,7 @@ public class AxilCompilerMemory {
 		return string.substring(1, string.length() - 1);
 	}
 	
-	private AxilType parseAxilType(String string) {
+	private AxilType parseType(String string) {
 		char first = string.charAt(0);
 		char last = string.charAt(string.length() - 1);
 		if(first == '\"' && last == '\"') {
@@ -154,18 +162,6 @@ public class AxilCompilerMemory {
 			if(c.getType() == AxilType.STRING) string += "memory.setString(" + c.getAddress() + ", \"" + c.getValue() + "\");\n";
 		}
 		System.out.println(string);
-	}
-	
-	public void load(AxilMemory memory) {
-		for(AxilConstant c : constants) {
-			if(c.getType() == AxilType.BOOLEAN) memory.setBoolean(c.getAddress(), (boolean) c.getValue());
-			if(c.getType() == AxilType.FLOAT) memory.setFloat(c.getAddress(), (float) c.getValue());
-			if(c.getType() == AxilType.INT) memory.setInt(c.getAddress(), (int) c.getValue());
-			if(c.getType() == AxilType.STRING) memory.setString(c.getAddress(), (String) c.getValue());
-		}
-		for(AxilFunction f : functions) {
-			memory.setFunction(f);
-		}
 	}
 
 }
