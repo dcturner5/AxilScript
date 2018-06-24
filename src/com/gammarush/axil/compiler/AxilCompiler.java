@@ -2,6 +2,7 @@ package com.gammarush.axil.compiler;
 
 import java.util.ArrayList;
 
+import com.gammarush.axil.AxilLoader;
 import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
 import com.gammarush.axil.compiler.operators.AxilOperator;
 import com.gammarush.axil.compiler.operators.AxilOperatorCompiler;
@@ -14,10 +15,9 @@ public class AxilCompiler {
 	
 	private static AxilOperatorMap OPERATORS = new AxilOperatorMap();
 	
-	private AxilMethodMap methods;
+	private AxilMethodMap methods = new AxilMethodMap();
 	
-	public AxilCompiler(AxilMethodMap methods) {
-		
+	public AxilCompiler() {
 		OPERATORS.put(new AxilOperator("!", "negate", 16, 1));
 		OPERATORS.put(new AxilOperator("++", "increment", 16, 1));
 		OPERATORS.put(new AxilOperator("--", "decrement", 16, 1));
@@ -44,17 +44,18 @@ public class AxilCompiler {
 		OPERATORS.put(new AxilOperator("/=", "assign_divide", 3));
 		OPERATORS.put(new AxilOperator("%=", "assign_remainder", 3));
 		OPERATORS.put(new AxilOperator("**=", "assign_power", 3));
-		
-		this.methods = methods;
 	}
 	
-	public int[] compile(String string, AxilCompilerMemory memory) {
-		return compile(string, 0, memory);
+	public void compile(String path) {
+		String string = sanitize(AxilLoader.loadTextFile(path));
+		AxilCompilerMemory memory = new AxilCompilerMemory();
+		
+		int[] instructions = compile(string, 0, memory);
+		
+		AxilLoader.save(path, instructions, memory);
 	}
 	
 	public int[] compile(String string, int index, AxilCompilerMemory memory) {
-		string = sanitize(string);
-		
 		int[] result = new int[] {};
 		ArrayList<String> lines = getLines(string);
 		
@@ -73,14 +74,33 @@ public class AxilCompiler {
 		}*/
 		
 		for(String line : lines) {
-			//System.out.println("LINE: " + line);
 			int[] instructions = compileLine(line, index + result.length, memory);
 			result = combine(result, instructions);
 		}
 		
-		//memory.print();
-		
 		return result;
+	}
+	
+	private int[] compileLine(String string, int index, AxilCompilerMemory memory) {
+		if(isFunctionDeclaration(string)) {
+			return compileFunctionDeclaration(string, index, memory);
+		}
+		else if(isIfStatement(string)) {
+			//System.out.println("IF STATEMENT: " + string);
+			return compileIfStatement(string, index, memory);
+		}
+		else if(isReturnStatement(string)) {
+			System.out.println("RETURN STATEMENT: " + string);
+			return new int[] {};
+		}
+		else if(isWhileLoop(string)) {
+			//System.out.println("WHILE LOOP: " + string);
+			return compileWhileLoop(string, index, memory);
+		}
+		else {
+			//System.out.println("EXPRESSION: " + string);
+			return compileExpression(string, index, memory);
+		}
 	}
 	
 	private int[] compileExpression(String string, int index, AxilCompilerMemory memory) {
@@ -284,28 +304,6 @@ public class AxilCompiler {
 		return result;
 	}
 	
-	private int[] compileLine(String string, int index, AxilCompilerMemory memory) {
-		if(isFunctionDeclaration(string)) {
-			return compileFunctionDeclaration(string, index, memory);
-		}
-		else if(isIfStatement(string)) {
-			//System.out.println("IF STATEMENT: " + string);
-			return compileIfStatement(string, index, memory);
-		}
-		else if(isReturnStatement(string)) {
-			System.out.println("RETURN STATEMENT: " + string);
-			return new int[] {};
-		}
-		else if(isWhileLoop(string)) {
-			//System.out.println("WHILE LOOP: " + string);
-			return compileWhileLoop(string, index, memory);
-		}
-		else {
-			//System.out.println("EXPRESSION: " + string);
-			return compileExpression(string, index, memory);
-		}
-	}
-	
 	private int[] compileMethodCall(String string, int index, AxilCompilerMemory memory) {
 		int pIndex = string.indexOf('(');
 		String name = string.substring(0, pIndex);
@@ -506,6 +504,14 @@ public class AxilCompiler {
 	
 	private String sanitize(String string) {
 		return string.replaceAll("\\s+(?=((\\\\[\\\\\"]|[^\\\\\"])*\"(\\\\[\\\\\"]|[^\\\\\"])*\")*(\\\\[\\\\\"]|[^\\\\\"])*$)", "");
+	}
+	
+	public AxilMethod getMethod(int id) {
+		return methods.get(id);
+	}
+	
+	public void setMethod() {
+		
 	}
 	
 	//move to util class one day

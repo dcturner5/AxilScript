@@ -2,9 +2,6 @@ package com.gammarush.axil.memory;
 
 import java.util.HashMap;
 
-import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
-import com.gammarush.axil.compiler.memory.AxilConstant;
-
 public class AxilMemory {
 	
 	private Object[] array;
@@ -192,18 +189,6 @@ public class AxilMemory {
 		result += string;
 		result += "\n";
 		System.err.println(result);
-	}
-	
-	public void load(AxilCompilerMemory compilerMemory) {
-		for(AxilConstant c : compilerMemory.getConstants()) {
-			if(c.getType() == AxilType.BOOLEAN) setBoolean(c.getAddress(), (boolean) c.getValue());
-			if(c.getType() == AxilType.FLOAT) setFloat(c.getAddress(), (float) c.getValue());
-			if(c.getType() == AxilType.INT) setInt(c.getAddress(), (int) c.getValue());
-			if(c.getType() == AxilType.STRING) setString(c.getAddress(), (String) c.getValue());
-		}
-		for(AxilFunction f : compilerMemory.getFunctions()) {
-			setFunction(f);
-		}
 	}
 
 }

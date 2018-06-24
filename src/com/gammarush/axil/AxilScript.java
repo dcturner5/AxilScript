@@ -7,7 +7,6 @@ import java.util.Arrays;
 import javax.swing.JFrame;
 
 import com.gammarush.axil.compiler.AxilCompiler;
-import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
 import com.gammarush.axil.memory.AxilFunction;
 import com.gammarush.axil.memory.AxilMemory;
 import com.gammarush.axil.methods.AxilMethod;
@@ -15,36 +14,14 @@ import com.gammarush.axil.methods.AxilMethodMap;
 
 public class AxilScript {
 	
-	private String path;
 	private int[] instructions;
-	
-	private AxilCompiler compiler;
 	private AxilMemory memory;
 	private AxilMethodMap methods;
 	
-	public AxilScript(String path) {
-		this.path = path;
-		
-		memory = new AxilMemory(1024);
-		methods = new AxilMethodMap();
-		
-		compiler = new AxilCompiler(methods);
-	}
-	
-	public void compile() {
-		String string = AxilLoader.load(path);
-		
-		AxilCompilerMemory compilerMemory = new AxilCompilerMemory();
-		instructions = compiler.compile(string, compilerMemory);
-		memory.load(compilerMemory);
-		
-		System.out.println("*****");
-		String s = path + ": ";
-		for(int i : instructions) {
-			s += i + ", ";
-		}
-		System.out.println(s.substring(0, s.length() - 2));
-		System.out.println("*****");
+	public AxilScript(int[] instructions, AxilMemory memory, AxilMethodMap methods) {
+		this.instructions = instructions;
+		this.memory = memory;
+		this.methods = methods;
 	}
 	
 	public void run() {
@@ -94,9 +71,20 @@ public class AxilScript {
 		}
 	}
 	
+	public static int indexOf(int[] array, int value) {
+	    for(int i = 0; i < array.length; i++) {
+	         if(array[i] == value) {
+	             return i;
+	         }
+		}
+		return -1;
+	}
+	
 	public static void main(String[] args) {
-		AxilScript script = new AxilScript("res/test.axil");
-		script.compile();
+		AxilCompiler compiler = new AxilCompiler();
+		compiler.compile("res/test.txt");
+		
+		AxilScript script = AxilLoader.open("res/test.axil");
 		script.run();
 		
 		JFrame frame = new JFrame();
@@ -104,7 +92,7 @@ public class AxilScript {
 		frame.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				script.call("click", "Dalton");
+				script.call("printName", "Dalton");
 			}
 			@Override
 			public void mouseEntered(MouseEvent arg0) {}
@@ -118,15 +106,6 @@ public class AxilScript {
 		frame.setTitle("Click Me");
 		frame.setSize(800, 600);
 		frame.setVisible(true);
-	}
-	
-	public static int indexOf(int[] array, int value) {
-	    for(int i = 0; i < array.length; i++) {
-	         if(array[i] == value) {
-	             return i;
-	         }
-		}
-		return -1;
 	}
 
 }
