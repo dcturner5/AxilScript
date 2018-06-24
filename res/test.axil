@@ -1,10 +1,6 @@
 i = 0;
 
 function click(name) {
-	i = i + 1;
-	string = name + " you've clicked " + i + " time";
-	if(i != 1) {
-		string = string + "s";
-	}
-	print(string);
+	++i;
+	print(i);
 }

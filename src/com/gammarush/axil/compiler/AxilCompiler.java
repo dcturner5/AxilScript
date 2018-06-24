@@ -12,27 +12,38 @@ import com.gammarush.axil.methods.AxilMethodMap;
 
 public class AxilCompiler {
 	
-	private static final String[] NO_SPACE_SYMBOLS = new String[] {"**", "==", "!=", "<=", ">=", "!", "*", "/", "+", "-", "<", ">", "=", "(", ")", "[", "]", "{", "}", ",", "for", "function", "if", "else", "while"};
-	
 	private static AxilOperatorMap OPERATORS = new AxilOperatorMap();
 	
 	private AxilMethodMap methods;
 	
 	public AxilCompiler(AxilMethodMap methods) {
-		OPERATORS.put(new AxilOperator("**", "power", 15));
-		OPERATORS.put(new AxilOperator("<=", "less_than_or_equals", 11));
-		OPERATORS.put(new AxilOperator(">=", "greater_than_or_equals", 11));
-		OPERATORS.put(new AxilOperator("==", "equals", 10));
-		OPERATORS.put(new AxilOperator("!=", "not_equals", 10));
 		
 		OPERATORS.put(new AxilOperator("!", "negate", 16, 1));
+		OPERATORS.put(new AxilOperator("++", "increment", 16, 1));
+		OPERATORS.put(new AxilOperator("--", "decrement", 16, 1));
+		OPERATORS.put(new AxilOperator("**", "power", 15));
 		OPERATORS.put(new AxilOperator("*", "multiply", 14));
 		OPERATORS.put(new AxilOperator("/", "divide", 14));
+		OPERATORS.put(new AxilOperator("%", "remainder", 14));
 		OPERATORS.put(new AxilOperator("+", "add", 13));
 		OPERATORS.put(new AxilOperator("-", "subtract", 13));
 		OPERATORS.put(new AxilOperator("<", "less_than", 11));
 		OPERATORS.put(new AxilOperator(">", "greater_than", 11));
+		OPERATORS.put(new AxilOperator("<=", "less_than_or_equals", 11));
+		OPERATORS.put(new AxilOperator(">=", "greater_than_or_equals", 11));
+		OPERATORS.put(new AxilOperator("==", "equals", 10));
+		OPERATORS.put(new AxilOperator("!=", "not_equals", 10));
+		OPERATORS.put(new AxilOperator("===", "equals_strict", 10));
+		OPERATORS.put(new AxilOperator("!==", "not_equals_strict", 10));
+		OPERATORS.put(new AxilOperator("&&", "and", 6));
+		OPERATORS.put(new AxilOperator("||", "or", 5));
 		OPERATORS.put(new AxilOperator("=", "assign", 3));
+		OPERATORS.put(new AxilOperator("+=", "assign_add", 3));
+		OPERATORS.put(new AxilOperator("-=", "assign_subtract", 3));
+		OPERATORS.put(new AxilOperator("*=", "assign_multiply", 3));
+		OPERATORS.put(new AxilOperator("/=", "assign_divide", 3));
+		OPERATORS.put(new AxilOperator("%=", "assign_remainder", 3));
+		OPERATORS.put(new AxilOperator("**=", "assign_power", 3));
 		
 		this.methods = methods;
 	}
@@ -131,23 +142,22 @@ public class AxilCompiler {
 		AxilOperatorCompiler operatorCompiler = new AxilOperatorCompiler(methods);
 		startIndex = 0;
 		for(int i = 0; i < string.length(); i++) {
-			String c = String.valueOf(string.charAt(i));
+			String c = string.substring(i, i + 1);
 			for(AxilOperator op : OPERATORS.getArray()) {
 				boolean isOperator = false;
-				int operatorLength = 0;
+				int operatorLength = 1;
 				
 				if(op.equals(c)) {
 					isOperator = true;
 				}
-				else if(i != string.length() - 1 && op.equals(c + String.valueOf(string.charAt(i + 1)))) {
-					//System.out.println(op.getSymbol());
+				else if(i + op.getSymbol().length() < string.length() && op.equals(string.substring(i, i + op.getSymbol().length()))) {
 					isOperator = true;
-					operatorLength = 1;
+					operatorLength = op.getSymbol().length();
 				}
 				
 				if(isOperator) {
 					String variable = string.substring(startIndex, i);
-					String operatorSymbol = string.substring(i, i + operatorLength + 1);
+					String operatorSymbol = string.substring(i, i + operatorLength);
 					
 					if(!variable.equals("")) {
 						operatorCompiler.add(variable);
@@ -157,8 +167,8 @@ public class AxilCompiler {
 						operatorCompiler.add(operatorSymbol);
 					}
 					
-					startIndex = i + operatorLength + 1;
-					i += operatorLength;
+					startIndex = i + operatorLength;
+					i += operatorLength - 1;
 					break;
 				}
 			}
@@ -495,21 +505,7 @@ public class AxilCompiler {
 	}
 	
 	private String sanitize(String string) {
-		String temp = string;
-		
-		string = string.replace("\t", "");
-		
-		/*for(String s : ONE_SPACE_SYMBOLS) {
-			string = string.replace(" " + s, s);
-			string = string.replace(s + "  ", s + " ");
-		}*/
-		
-		for(String s : NO_SPACE_SYMBOLS) {
-			string = string.replace(" " + s, s);
-			string = string.replace(s + " ", s);
-		}
-		
-		return string.equals(temp) ? string : sanitize(string);
+		return string.replaceAll("\\s+(?=((\\\\[\\\\\"]|[^\\\\\"])*\"(\\\\[\\\\\"]|[^\\\\\"])*\")*(\\\\[\\\\\"]|[^\\\\\"])*$)", "");
 	}
 	
 	//move to util class one day
