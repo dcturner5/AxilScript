@@ -161,8 +161,14 @@ public class AxilCompiler {
 		
 		AxilOperatorCompiler operatorCompiler = new AxilOperatorCompiler(methods);
 		startIndex = 0;
+		stringLayer = 0;
 		for(int i = 0; i < string.length(); i++) {
 			String c = string.substring(i, i + 1);
+			if(c.equals("\"")) {
+				if(stringLayer == 0) stringLayer = 1;
+				else stringLayer = 0;
+			}
+			if(stringLayer == 0) {
 			for(AxilOperator op : OPERATORS.getArray()) {
 				boolean isOperator = false;
 				int operatorLength = 1;
@@ -192,6 +198,7 @@ public class AxilCompiler {
 					break;
 				}
 			}
+		}
 		}
 		operatorCompiler.add(string.substring(startIndex));
 		
@@ -504,14 +511,6 @@ public class AxilCompiler {
 	
 	private String sanitize(String string) {
 		return string.replaceAll("\\s+(?=((\\\\[\\\\\"]|[^\\\\\"])*\"(\\\\[\\\\\"]|[^\\\\\"])*\")*(\\\\[\\\\\"]|[^\\\\\"])*$)", "");
-	}
-	
-	public AxilMethod getMethod(int id) {
-		return methods.get(id);
-	}
-	
-	public void setMethod() {
-		
 	}
 	
 	//move to util class one day

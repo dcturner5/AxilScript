@@ -61,12 +61,10 @@ public class AxilLoader {
             while(in.available() > 0) {
             	if(status == STOP_CODE) {
             		status = in.readByte();
-            		System.out.println("STATUS: " + status);
             	}
             	if(status == CONSTANT_CODE) {
             		int address = in.readShort();
             		int type = in.readByte();
-            		System.out.print("[" + address + "] ");
             		if(type == BOOLEAN_CODE) {
             			memory.setBoolean(address, in.readBoolean());
             		}
@@ -93,7 +91,6 @@ public class AxilLoader {
             		}
             		int[] argAddresses = new int[argAddressList.size()];
             		for(int i = 0; i < argAddressList.size(); i++) {
-            			System.out.println(argAddressList.get(i) + ", ");
             			argAddresses[i] = argAddressList.get(i);
             		}
             		memory.setFunction(new AxilFunction(name, address, returnAddress, argAddresses));
@@ -106,7 +103,6 @@ public class AxilLoader {
             		}
             		instructions = new int[instructionList.size()];
             		for(int i = 0; i < instructionList.size(); i++) {
-            			System.out.print(instructionList.get(i) + ", ");
             			instructions[i] = instructionList.get(i);
             		}
             	}

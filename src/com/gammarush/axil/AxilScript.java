@@ -92,7 +92,7 @@ public class AxilScript {
 		frame.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				script.call("printName", "Dalton");
+				script.call("printName");
 			}
 			@Override
 			public void mouseEntered(MouseEvent arg0) {}

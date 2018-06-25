@@ -1,13 +1,12 @@
+a = "Hello";
+b = "World";
+
+print(a + " " + b);
+
 i = 0;
-b = true;
-c = 5.6;
-
-while(i < 10) {
-	print(i);
-	++i;
-}
-
-function printName(name) {
-	print(name + " " + square_root(i));
+name = "Dalton";
+function printName() {
+	name += i;
+	print("string: " + name + ", length: " + length(name));
 	++i;
 }
