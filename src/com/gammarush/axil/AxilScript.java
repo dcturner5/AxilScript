@@ -81,11 +81,20 @@ public class AxilScript {
 	}
 	
 	public static void main(String[] args) {
-		AxilCompiler compiler = new AxilCompiler();
-		compiler.compile("res/test.txt");
+		AxilMethodMap methods = new AxilMethodMap();
+		methods.put("test", 1, (int[] args1, AxilMemory memory) -> {
+			System.out.println("TEST");
+			return -1;
+		});
 		
-		AxilScript script = AxilLoader.open("res/test.axil");
+		AxilCompiler compiler = new AxilCompiler(methods);
+		compiler.compileFile("res/test.txt");
+		
+		AxilScript script = AxilLoader.open("res/test.axil", methods);
 		script.run();
+		
+		AxilScript script1 = compiler.compileString("test();");
+		script1.run();
 		
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

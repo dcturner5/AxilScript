@@ -1,12 +1,8 @@
-a = "Hello";
-b = "World";
-
-print(a + " " + b);
-
 i = 0;
 name = "Dalton";
 function printName() {
 	name += i;
 	print("string: " + name + ", length: " + length(name));
-	++i;
+	import res/increment.txt;
+	test();
 }

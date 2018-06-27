@@ -3,11 +3,13 @@ package com.gammarush.axil.compiler;
 import java.util.ArrayList;
 
 import com.gammarush.axil.AxilLoader;
+import com.gammarush.axil.AxilScript;
 import com.gammarush.axil.compiler.memory.AxilCompilerMemory;
 import com.gammarush.axil.compiler.operators.AxilOperator;
 import com.gammarush.axil.compiler.operators.AxilOperatorCompiler;
 import com.gammarush.axil.compiler.operators.AxilOperatorMap;
 import com.gammarush.axil.memory.AxilFunction;
+import com.gammarush.axil.memory.AxilMemory;
 import com.gammarush.axil.methods.AxilMethod;
 import com.gammarush.axil.methods.AxilMethodMap;
 
@@ -15,9 +17,11 @@ public class AxilCompiler {
 	
 	private static AxilOperatorMap OPERATORS = new AxilOperatorMap();
 	
-	private AxilMethodMap methods = new AxilMethodMap();
+	private AxilMethodMap methods;
 	
-	public AxilCompiler() {
+	public AxilCompiler(AxilMethodMap methods) {
+		this.methods = methods;
+		
 		OPERATORS.put(new AxilOperator("!", "negate", 16, 1));
 		OPERATORS.put(new AxilOperator("++", "increment", 16, 1));
 		OPERATORS.put(new AxilOperator("--", "decrement", 16, 1));
@@ -46,13 +50,24 @@ public class AxilCompiler {
 		OPERATORS.put(new AxilOperator("**=", "assign_power", 3));
 	}
 	
-	public void compile(String path) {
+	public void compileFile(String path) {
 		String string = sanitize(AxilLoader.loadTextFile(path));
 		AxilCompilerMemory memory = new AxilCompilerMemory();
-		
 		int[] instructions = compile(string, 0, memory);
-		
 		AxilLoader.save(path, instructions, memory);
+	}
+	
+	public int[] compileFile(String path, int index, AxilCompilerMemory memory) {
+		String string = sanitize(AxilLoader.loadTextFile(path));
+		int[] instructions = compile(string, index, memory);
+		return instructions;
+	}
+	
+	public AxilScript compileString(String string) {
+		string = sanitize(string);
+		AxilCompilerMemory memory = new AxilCompilerMemory();
+		int[] instructions = compile(string, 0, memory);
+		return new AxilScript(instructions, new AxilMemory(1024, memory), methods);
 	}
 	
 	public int[] compile(String string, int index, AxilCompilerMemory memory) {
@@ -88,6 +103,9 @@ public class AxilCompiler {
 		else if(isIfStatement(string)) {
 			//System.out.println("IF STATEMENT: " + string);
 			return compileIfStatement(string, index, memory);
+		}
+		else if(isImportStatement(string)) {
+			return compileImportStatement(string, index, memory);
 		}
 		else if(isReturnStatement(string)) {
 			System.out.println("RETURN STATEMENT: " + string);
@@ -311,6 +329,11 @@ public class AxilCompiler {
 		return result;
 	}
 	
+	private int[] compileImportStatement(String string, int index, AxilCompilerMemory memory) {
+		string = string.substring("import".length());
+		return compileFile(string, index, memory);
+	}
+	
 	private int[] compileMethodCall(String string, int index, AxilCompilerMemory memory) {
 		int pIndex = string.indexOf('(');
 		String name = string.substring(0, pIndex);
@@ -499,6 +522,10 @@ public class AxilCompiler {
 	
 	private boolean isIfStatement(String string) {
 		return string.indexOf("if") == 0;
+	}
+	
+	private boolean isImportStatement(String string) {
+		return string.indexOf("import") == 0;
 	}
 	
 	private boolean isReturnStatement(String string) {

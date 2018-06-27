@@ -50,6 +50,10 @@ public class AxilLoader {
 	}
 	
 	public static AxilScript open(String path) {
+		return open(path, new AxilMethodMap());
+	}
+	
+	public static AxilScript open(String path, AxilMethodMap methods) {
 		int[] instructions = new int[0];
 		AxilMemory memory = new AxilMemory(1024);
 		
@@ -115,7 +119,7 @@ public class AxilLoader {
 			e.printStackTrace();
 		}
 		
-		return new AxilScript(instructions, memory, new AxilMethodMap());
+		return new AxilScript(instructions, memory, methods);
 	}
 	
 	public static void save(String path, int[] instructions, AxilCompilerMemory memory) {
