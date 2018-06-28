@@ -4,5 +4,4 @@ function printName() {
 	name += i;
 	print("string: " + name + ", length: " + length(name));
 	import res/increment.txt;
-	test();
 }

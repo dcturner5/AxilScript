@@ -70,23 +70,27 @@ public class AxilCompiler {
 		return new AxilScript(instructions, new AxilMemory(1024, memory), methods);
 	}
 	
-	public int[] compile(String string, int index, AxilCompilerMemory memory) {
+	private int[] compile(String string, int index, AxilCompilerMemory memory) {
 		int[] result = new int[] {};
 		ArrayList<String> lines = getLines(string);
 		
-		//TODO Fix if, elseif, and else linking
-		/*boolean ifStatement = false;
+		int count = 0;
+		ArrayList<String> removeQueue = new ArrayList<String>();
 		for(int i = 0; i < lines.size(); i++) {
 			String line = lines.get(i);
-			if(ifStatement && (isElseIfStatement(line) || isElseStatement(line))) {
-				lines.set(i - 1, lines.get(i - 1) + line);
-				ifStatement = isIfStatement(line) || isElseIfStatement(line);
-				lines.remove(i);
+			if(count > 0 && (isElseIfStatement(line) || isElseStatement(line))) {
+				lines.set(i - count, lines.get(i - count) + line);
+				count = (isIfStatement(line) || isElseIfStatement(line)) ? count + 1 : 0;
+				removeQueue.add(line);
 			}
 			else {
-				ifStatement = isIfStatement(line) || isElseIfStatement(line);
+				count = (isIfStatement(line) || isElseIfStatement(line)) ? count + 1 : 0;
 			}
-		}*/
+		}
+		
+		for(String line : removeQueue) {
+			lines.remove(line);
+		}
 		
 		for(String line : lines) {
 			int[] instructions = compileLine(line, index + result.length, memory);
@@ -508,13 +512,13 @@ public class AxilCompiler {
 		return result;
 	}
 	
-	/*private boolean isElseStatement(String string) {
+	private boolean isElseStatement(String string) {
 		return string.indexOf("else") == 0 && string.indexOf("elseif") != 0;
 	}
 	
 	private boolean isElseIfStatement(String string) {
 		return string.indexOf("elseif") == 0;
-	}*/
+	}
 	
 	private boolean isFunctionDeclaration(String string) {
 		return string.indexOf("function") == 0;

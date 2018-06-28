@@ -1,12 +1,7 @@
 package com.gammarush.axil;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.Arrays;
 
-import javax.swing.JFrame;
-
-import com.gammarush.axil.compiler.AxilCompiler;
 import com.gammarush.axil.memory.AxilFunction;
 import com.gammarush.axil.memory.AxilMemory;
 import com.gammarush.axil.methods.AxilMethod;
@@ -80,7 +75,7 @@ public class AxilScript {
 		return -1;
 	}
 	
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		AxilMethodMap methods = new AxilMethodMap();
 		methods.put("test", 1, (int[] args1, AxilMemory memory) -> {
 			System.out.println("TEST");
@@ -92,9 +87,6 @@ public class AxilScript {
 		
 		AxilScript script = AxilLoader.open("res/test.axil", methods);
 		script.run();
-		
-		AxilScript script1 = compiler.compileString("test();");
-		script1.run();
 		
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -115,6 +107,6 @@ public class AxilScript {
 		frame.setTitle("Click Me");
 		frame.setSize(800, 600);
 		frame.setVisible(true);
-	}
+	}*/
 
 }
